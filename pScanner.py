@@ -1,20 +1,21 @@
 
 import socket
-import ethernetUtils as eUtils
 import sys
+import tcpConnectAttack
 
-def scanPort(host, port):
+def scanPort(destIp, destMac, dstPort, srcIp, srcMac, srcPort):
     try:
-        sock = socket.socket()
+        sock = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
         sock.settimeout(10)
 
-        result = sock.connect_ex((host, port))
+        result = sock.connect_ex((destIp, dstPort))
         if result == 0:
             sock.close()
-            print ("Open Port Detected {}".format(port))
-            print (eUtils.getMac())
+            print ("Open Port Detected {}".format(dstPort))
+            __startAttack(destIp, destMac, dstPort, srcIp, srcMac, srcPort)
+        else :
+            print ("Closed Port {}".format(dstPort))
 
-            __startAttack(host, port)
 
     except KeyboardInterrupt:
         print ("You pressed Ctrl+C")
@@ -29,20 +30,21 @@ def scanPort(host, port):
         quit()
 
         
-def __startAttack(host, port):
+def __startAttack(destIp, destMac, dstPort, srcIp, srcMac, srcPort):
     try:
         option = input ("1 -> TCP CONNECT \n" +
                         "0 -> Quit \n" +
-                        "Select Attack : "
-                        )
+                        "Select Attack : ")
 
         {
-        '0': lambda x, y : sys.exit(),
-        '1': lambda host, port: print("PORT SCANNER: {} {}".format(host, port)) ,
-        }[option](host, port)
+        '0': lambda a, b, c, x, y, z: sys.exit(),
+        '1': lambda destIp, destMac, dstPort, srcIp, srcMac, srcPort: tcpConnectAttack.doTcpConnect(destIp, destMac, dstPort, srcIp, srcMac, srcPort) ,
+        }[option](destIp, destMac, dstPort, srcIp, srcMac, srcPort)
     except SystemExit:
         print ("Quitting now")
         sys.exit()
-    except :
+    except Exception as e:
+        print(e)
         print ("Invalid option. Quitting now")
         sys.exit()
+        
