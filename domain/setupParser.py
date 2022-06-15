@@ -2,6 +2,7 @@
 
 import json
 import os
+from domain.settingsData import HostData, PortRange
 
 jsonFileName = 'settings.json'
 
@@ -27,25 +28,6 @@ settingsDefault = """
 
 }
 """
-
-class HostData:
-    def __init__(self, ipv6, mac, port):
-        self.ipv6 = ipv6
-        self.mac = mac
-        self.port = port
-
-    @classmethod
-    def fromDict(cls, dict):
-        return cls(dict['ipv6'],dict['mac'], dict['port'])
-
-class PortRange:
-    def __init__(self, start, end):
-        self.start = start
-        self.end = end
-
-    @classmethod
-    def fromDict(cls, dict):
-        return cls(dict['start'],dict['end'])
     
 def loadData(jsonFile):
     with open(jsonFile, "r") as read_file:

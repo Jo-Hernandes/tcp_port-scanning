@@ -110,6 +110,9 @@ ENV/
 env.bak/
 venv.bak/
 
+#python
+*.json
+
 # Spyder project settings
 .spyderproject
 .spyproject
