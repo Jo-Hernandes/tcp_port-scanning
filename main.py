@@ -1,10 +1,9 @@
 import argparse
 import subprocess
 import sys
-import ethernetUtils
-import pScanner as ps
 import domain.setupParser as parser
-
+from domain.settingsData import HostData, PortRange
+from attacks.tcpConnectAttack import doTcpConnect
 
 def setupArguments():
     parser = argparse.ArgumentParser(
@@ -30,8 +29,16 @@ if __name__ == "__main__":
             parser.generateFile()
             sys.exit()
         else:
-            parser.loadData(args.settings)
-        
+            dst, src, portRange = parser.loadData(args.settings)
+            print(dst, src, portRange)
+            for port in range(portRange.start, portRange.end):
+                dst.port = port
+                doTcpConnect(dst, src)
+                
+
+    except TypeError as e:
+        print("Incorred values in settings file: {}".format(e))
+        sys.exit()    
                     
     except KeyboardInterrupt:
         print ("You pressed Ctrl+C")

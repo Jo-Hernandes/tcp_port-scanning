@@ -7,23 +7,25 @@ from domain.settingsData import HostData, PortRange
 jsonFileName = 'settings.json'
 
 settingsDefault = """
-{
+
 
     "dst_host" : {
         "ipv6" : "",
         "mac" : "",
+        "interface": null,
         "port" : null
     },
 
     "src_host" : {
         "ipv6" : "",
         "mac" : "",
+        "interface" : "",
         "port" : ""
     },
 
     "port_range" : {
         "start" : 0,
-        "end" : 12345
+        "end" : 0
     }
 
 }
@@ -32,9 +34,7 @@ settingsDefault = """
 def loadData(jsonFile):
     with open(jsonFile, "r") as read_file:
         data = json.load(read_file)
-        print(HostData.fromDict(dict = data['dst_host']))
-        print(HostData.fromDict(dict = data['src_host']))
-        print(PortRange.fromDict(data['port_range']))
+        return HostData.fromDict(dict = data['dst_host']), HostData.fromDict(dict = data['src_host']) , PortRange.fromDict(data['port_range'])
 
 def generateFile():
     if not os.path.exists(jsonFileName):

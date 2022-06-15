@@ -1,15 +1,14 @@
 
-import packetUtils as pUtils
-import ethernetUtils as eUtils
+import utils.packetUtils as pUtils
+import utils.ethernetUtils as eUtils
 
 
 
-def doTcpConnect(destIp, destMac, dstPort, srcIp, srcMac, srcPort):
-    ethernetHeader = pUtils.buildEthernet(eUtils.getMacAsByteArray(destMac), eUtils.getMacAsByteArray(srcMac), pUtils.IPV6_ETH_HEADER)
-    tcpHeader = pUtils.buildTcpPacket(destIp, srcIp, int(dstPort), int(srcPort))
-
-    ipHeader = pUtils.buildIPv6Packet(destIp, srcIp, len(tcpHeader))
+def doTcpConnect(dstHost, srcHost):
+    ethernetHeader = pUtils.buildEthernet(eUtils.getMacAsByteArray(dstHost.mac), eUtils.getMacAsByteArray(srcHost.mac), pUtils.IPV6_ETH_HEADER)
+    tcpHeader = pUtils.buildTcpPacket(dstHost.ipv6, srcHost.ipv6, int(dstHost.port), int(srcHost.port))
+    ipHeader = pUtils.buildIPv6Packet(dstHost.ipv6, srcHost.ipv6, len(tcpHeader))
     
 
-    eUtils.sendeth(tcpHeader)
+    eUtils.sendeth(ethernetHeader + ipHeader + tcpHeader, srcHost.interface, srcHost.port)
     print("packet send")

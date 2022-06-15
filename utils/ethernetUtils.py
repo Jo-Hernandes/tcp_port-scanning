@@ -1,21 +1,10 @@
 import socket as sock
 from struct import *
-from getmac import get_mac_address
 
-def sendeth(eth_frame, interface="eth0"):
-
-    addrs = sock.getaddrinfo('2804:14d:4c87:85a7:f0e9:9253:c637:1d58', 1, sock.AF_INET6, 0, sock.SOL_IP)
-    print(addrs)
-
-    s = sock.socket(sock.AF_INET6, sock.SOCK_RAW, 0)
-    s.setsockopt(sock.IPPROTO_IPV6, sock.IP_HDRINCL, 1)
-
-    # s.bind(('2804:14d:4c87:85a7:f0e9:9253:c637:1d58', 1, 0, 0))
-    
-    return s.sendto( bytes("minha bunda", "ascii"), ('2804:14d:4c87:85a7:f0e9:9253:c637:1d58', 1, 0, 0))
-
-def getMac(int):
-    return get_mac_address(interface=int)
+def sendeth(eth_frame, interface="eth0", port=9001):
+    s = sock.socket(sock.AF_PACKET, sock.SOCK_RAW)
+    s.bind((interface, port))
+    return s.send(eth_frame)
 
 def getMacAsByteArray(readableMac):
     return bytearray.fromhex(readableMac.translate(str.maketrans('', '', ':')))

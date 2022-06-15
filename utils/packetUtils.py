@@ -2,7 +2,7 @@ import socket
 
 from struct import *
 from collections import namedtuple
-from ethernetUtils import getReadableMac
+from utils.ethernetUtils import getReadableMac
 
 try:
     from itertools import izip_longest as zip_longest
@@ -19,7 +19,7 @@ ethernetPacket = namedtuple('Ethernet', 'macDst macAddr ethType')
 
 
 def buildEthernet(destinationMac, sourceMac, protocol):
-    packet = pack(ETH_STRUCT_FORMAT, sourceMac, destinationMac, protocol)
+    packet = pack(ETH_STRUCT_FORMAT, destinationMac, sourceMac, protocol)
     return packet
 
 def unpackEthernet(record):
