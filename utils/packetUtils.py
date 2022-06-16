@@ -1,4 +1,6 @@
 import socket
+import binascii
+import sys
 
 from struct import *
 from collections import namedtuple
@@ -15,27 +17,16 @@ ETH_STRUCT_FORMAT = '!6s6sH'
 IPV6_STRUCT_FORMAT = '!IHBB'
 TCP_STRUCT_FORMAT = '!HHLLBBHHH'
 
-ethernetPacket = namedtuple('Ethernet', 'macDst macAddr ethType')
-
 
 def buildEthernet(destinationMac, sourceMac, protocol):
     packet = pack(ETH_STRUCT_FORMAT, destinationMac, sourceMac, protocol)
     return packet
 
-def unpackEthernet(record):
-    packet = ethernetPacket._make(unpack(ETH_STRUCT_FORMAT, record))
-    return ethernetPacket._make([
-        getReadableMac(packet.macDst),
-        getReadableMac(packet.macAddr),
-        packet.ethType
-    ])
-
 def buildIPv6Packet(destIp, sourceIp, len):
-    # ip header fields
     version     = 6                       #4 bit
     traffic_class = 0                     #8 bit
     flow_level  = 1                       #20 bit
-    payload_len = len #not true lenght, I just selected a random value        #16 bit
+    payload_len = len                     #16 bit
     next_header = socket.IPPROTO_TCP      #8 bit
     hop_limit   = 255                     #8 bit
     saddr = socket.inet_pton ( socket.AF_INET6, sourceIp )  #128 bit
@@ -48,7 +39,7 @@ def buildIPv6Packet(destIp, sourceIp, len):
     return ip_header + saddr + daddr
     
 
-def buildTcpPacket(destIp, sourceIp, destPort, sourcePort):
+def buildTcpPacket(destIp, sourceIp, destPort, sourcePort,  ):
     seq = 0
     ack_seq = 0
     doff = 5    #4 bit field, size of tcp header, 5*4 = 20 bytes
@@ -59,7 +50,8 @@ def buildTcpPacket(destIp, sourceIp, destPort, sourcePort):
     psh = 0
     ack = 0
     urg = 0
-    window = socket.htons (5840)    #maximum allowed window size
+
+    window = socket.htons (0)
     check = 0
     urg_ptr = 0
 
@@ -107,3 +99,80 @@ def __checksum__(data):
         return 0xFFFF
     else:
         return checksum
+
+
+def ethernet_frame(data):
+    """
+        Unpacks our ethernet frame.
+    """
+    dest_mac, src_mac, proto = unpack('! 6s 6s H', data[:14])
+    output = {
+        "source": getReadableMac(dest_mac),
+        "dest": getReadableMac(src_mac),
+        "protocol": socket.htons(proto),
+        "payload": data[14:],
+    }
+    return output
+
+
+def get_ipv6_addr(mac_bytes):
+    return socket.inet_ntop(socket.AF_INET6, mac_bytes).upper()
+
+
+def ipv6_unpack(data):
+    """
+        Breaks open the ipv6 header and returns the payload while
+        printing all the relevant information inside the header
+    """
+    version = data[0] >> 4
+    traffic_class = (data[0] & 0xF) * 16 + (data[1] >> 4)
+    payload_length = int(binascii.hexlify(data[4:6]).decode('ascii'), 16)
+    next_header = data[6]
+    hop_limit = data[7]
+    src_address = get_ipv6_addr(data[8:24])
+    target_address = get_ipv6_addr(data[24:40])
+    # string = f'IPv{version} Source: {src_address}  Target: {target_address} Payload: {payload_length} bytes'
+    output = {
+        "version": version,
+        "next_header": next_header,
+        "source": src_address,
+        "target": target_address,
+        "payload": data[40:]
+    }
+    return output
+
+
+def tcp_unpack(data):
+    src_port, dest_port, sequence, ack, offset_r_flags = unpack('! H H L L H', data[:14])
+    offset = (offset_r_flags >> 12) * 4
+    flag_urg = (offset_r_flags & 32) >> 5
+    flag_ack = (offset_r_flags & 16) >> 4
+    flag_psh = (offset_r_flags & 8) >> 3
+    flag_rst = (offset_r_flags & 4) >> 2
+    flag_syn = (offset_r_flags & 2) >> 1
+    flag_fin = offset_r_flags & 1
+    output = {
+        "source": src_port, "dest": dest_port, "sequence": sequence, "ack": ack, "offset_r_flags": offset_r_flags,
+        "flag_ack": flag_ack, "flag_rst": flag_rst, "flag_syn": flag_syn, "flag_fin": flag_fin,
+    }
+    return output
+
+def print_header(ip_data, tcp_data):
+    ip_version = ip_data["version"]
+    ip_src = ip_data["source"]
+    ip_target = ip_data["target"]
+    # (src_port, dest_port, sequence, ack, offset_r_flags) = unpack('! H H L L H', data[:14])
+    src_port = tcp_data["source"]
+    dest_port = tcp_data["dest"]
+    sequence = tcp_data["sequence"]
+    ack = tcp_data["ack"]
+    flag_ack = tcp_data["flag_ack"]
+    flag_rst = tcp_data["flag_rst"]
+    flag_syn = tcp_data["flag_syn"]
+    flag_fin = tcp_data["flag_fin"]
+    s = f'IPv{ip_version} Source Address: {ip_src} Target Address {ip_target} '\
+        f'TCP - Source Port: {src_port} Destination Port: {dest_port} ' \
+        f'Flags: S[{flag_syn}] A[{flag_ack}] F[{flag_fin}] R[{flag_rst}] ' \
+        f'Sequence: {sequence} Acknowledgement: {ack} Payload: {sys.getsizeof(tcp_data) - 33} bytes '
+    # print(data[offset:])
+    return s
