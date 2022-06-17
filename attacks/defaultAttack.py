@@ -15,7 +15,7 @@ def doTcpAttack(dstHost, srcHost, tcpFlags, onPacketReceive):
     sniffingSocket = eUtils.getSniffingSocket()
     eUtils.sendeth(getTcpPacket(dstHost, srcHost, tcpFlags), srcHost.interface, srcHost.port)
 
-    portOpen = True
+    portOpen = False
     for i in range(0, 50):
         showAnimation(i)
         packet = sniffingSocket.recvfrom(65565)
