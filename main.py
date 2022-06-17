@@ -2,8 +2,10 @@ import argparse
 import subprocess
 import sys
 import domain.setupParser as parser
-from domain.settingsData import HostData, PortRange
-from attacks.tcpConnectAttack import doTcpConnect
+
+from attacks.tcpConnectAttack import doTcpConnectAttack
+from attacks.tcpHalfOpenningAttack import doHalfOpenningAttack
+from attacks.tcpFINAttack import doFINAttack
 
 def setupArguments():
     parser = argparse.ArgumentParser(
@@ -33,7 +35,9 @@ if __name__ == "__main__":
             print(dst, src, portRange)
             for port in range(portRange.start, portRange.end):
                 dst.port = port
-                doTcpConnect(dst, src)
+                portOpen = doFINAttack(dst, src)
+
+                print('ataque realizado status : {}'.format(portOpen))
                 
 
     except TypeError as e:

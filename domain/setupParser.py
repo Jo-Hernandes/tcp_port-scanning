@@ -7,8 +7,6 @@ from domain.settingsData import HostData, PortRange
 jsonFileName = 'settings.json'
 
 settingsDefault = """
-
-
     "dst_host" : {
         "ipv6" : "",
         "mac" : "",

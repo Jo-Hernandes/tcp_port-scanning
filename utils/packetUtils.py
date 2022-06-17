@@ -39,19 +39,19 @@ def buildIPv6Packet(destIp, sourceIp, len):
     return ip_header + saddr + daddr
     
 
-def buildTcpPacket(destIp, sourceIp, destPort, sourcePort,  ):
-    seq = 0
-    ack_seq = 0
+def buildTcpPacket(destIp, sourceIp, destPort, sourcePort, sequence = 0, ackSeq = 0, flags = {'fin' : 0, 'syn' : 0, 'rst' : 0, 'psh' : 0, 'ack' : 0, 'urg' : 0 } ):
+    seq = sequence
+    ack_seq = sequence
     doff = 5    #4 bit field, size of tcp header, 5*4 = 20 bytes
     #tcp flags
-    fin = 0
-    syn = 1
-    rst = 0
-    psh = 0
-    ack = 0
-    urg = 0
+    fin = flags['fin']
+    syn = flags['syn']
+    rst = flags['rst']
+    psh = flags['psh']
+    ack = flags['ack']
+    urg = flags['urg']
 
-    window = socket.htons (0)
+    window = socket.htons (9000)
     check = 0
     urg_ptr = 0
 
@@ -153,26 +153,6 @@ def tcp_unpack(data):
     flag_fin = offset_r_flags & 1
     output = {
         "source": src_port, "dest": dest_port, "sequence": sequence, "ack": ack, "offset_r_flags": offset_r_flags,
-        "flag_ack": flag_ack, "flag_rst": flag_rst, "flag_syn": flag_syn, "flag_fin": flag_fin,
+        "flag_ack": flag_ack, "flag_rst": flag_rst, "flag_syn": flag_syn, "flag_fin": flag_fin, 'flag_urg': flag_urg, 'flag_psh' : flag_psh
     }
     return output
-
-def print_header(ip_data, tcp_data):
-    ip_version = ip_data["version"]
-    ip_src = ip_data["source"]
-    ip_target = ip_data["target"]
-    # (src_port, dest_port, sequence, ack, offset_r_flags) = unpack('! H H L L H', data[:14])
-    src_port = tcp_data["source"]
-    dest_port = tcp_data["dest"]
-    sequence = tcp_data["sequence"]
-    ack = tcp_data["ack"]
-    flag_ack = tcp_data["flag_ack"]
-    flag_rst = tcp_data["flag_rst"]
-    flag_syn = tcp_data["flag_syn"]
-    flag_fin = tcp_data["flag_fin"]
-    s = f'IPv{ip_version} Source Address: {ip_src} Target Address {ip_target} '\
-        f'TCP - Source Port: {src_port} Destination Port: {dest_port} ' \
-        f'Flags: S[{flag_syn}] A[{flag_ack}] F[{flag_fin}] R[{flag_rst}] ' \
-        f'Sequence: {sequence} Acknowledgement: {ack} Payload: {sys.getsizeof(tcp_data) - 33} bytes '
-    # print(data[offset:])
-    return s

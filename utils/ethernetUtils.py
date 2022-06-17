@@ -6,11 +6,9 @@ def sendeth(eth_frame, interface="eth0", port=9001):
     s = sock.socket(AF_PACKET, SOCK_RAW)
     s.bind((interface, port))
     s.send(eth_frame)
-    s.close()
 
-def getSniffingSocket(interface="eth0", port=9001):
+def getSniffingSocket():
     s = sock.socket(AF_PACKET, SOCK_RAW, sock.htons(0x0003))
-    # s.bind((interface, port))
     return s
 
 def getMacAsByteArray(readableMac):
