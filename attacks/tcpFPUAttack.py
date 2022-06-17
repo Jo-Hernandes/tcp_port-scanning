@@ -8,5 +8,5 @@ def __onTcpReceived(_, __, tcpPacket):
         return True
 
 def doFPUAttack(dstHost, srcHost):
-    return doTcpAttack(dstHost, srcHost, tcpFlags=FPU, onPacketReceive=__onTcpReceived)
+    return doTcpAttack(dstHost, srcHost, tcpFlags=FPU, reverse=True, onPacketReceive=__onTcpReceived)
 

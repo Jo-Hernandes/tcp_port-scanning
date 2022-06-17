@@ -8,5 +8,5 @@ def __onTcpReceived(_, __, tcpPacket):
         return True
 
 def doFINAttack(dstHost, srcHost):
-    return doTcpAttack(dstHost, srcHost, tcpFlags=FIN, onPacketReceive=__onTcpReceived)
+    return doTcpAttack(dstHost, srcHost, tcpFlags=FIN, reverse=True, onPacketReceive=__onTcpReceived)
 

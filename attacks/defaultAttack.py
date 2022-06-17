@@ -10,12 +10,12 @@ def getTcpPacket(dstHost, srcHost, tcpFlags):
 
     return ethernetHeader + ipHeader + tcpHeader
 
-def doTcpAttack(dstHost, srcHost, tcpFlags, onPacketReceive):
+def doTcpAttack(dstHost, srcHost, tcpFlags, onPacketReceive, reverse = False):
 
     sniffingSocket = eUtils.getSniffingSocket()
     eUtils.sendeth(getTcpPacket(dstHost, srcHost, tcpFlags), srcHost.interface, srcHost.port)
 
-    portOpen = False
+    portOpen = reverse
     for i in range(0, 50):
         showAnimation(i)
         packet = sniffingSocket.recvfrom(65565)
@@ -29,7 +29,10 @@ def doTcpAttack(dstHost, srcHost, tcpFlags, onPacketReceive):
             ipv6Packet['target'] == srcHost.ipv6.upper() ): 
 
                 tcpPacket = pUtils.tcp_unpack(ipv6Packet['payload'])
-                portOpen = portOpen and onPacketReceive(dstHost, srcHost, tcpPacket)
+                if reverse:
+                    portOpen = portOpen and onPacketReceive(dstHost, srcHost, tcpPacket)
+                else :
+                    portOpen = portOpen or onPacketReceive(dstHost, srcHost, tcpPacket)
 
     sniffingSocket.close()
     print("\r", '', end="") 

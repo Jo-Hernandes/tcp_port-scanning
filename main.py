@@ -74,13 +74,7 @@ if __name__ == "__main__":
                     totalAttacks = totalAttacks + value
                     print(' -- Attack Status : {}'.format(message))
                 
-                print('Result for {} : {} \n'.format(port, portResult[totalAttacks == len(usingAttacks)]))
-                
-
-                
-
-                
-                
+                print('Result for {} : {} \n'.format(port, portResult[totalAttacks == len(usingAttacks)]))     
 
     except TypeError as e:
         print("Incorred values in settings file: {}".format(e))
