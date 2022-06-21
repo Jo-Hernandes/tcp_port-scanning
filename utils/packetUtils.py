@@ -41,7 +41,7 @@ def buildIPv6Packet(destIp, sourceIp, len):
 
 def buildTcpPacket(destIp, sourceIp, destPort, sourcePort, sequence = 0, ackSeq = 0, flags = {'fin' : 0, 'syn' : 0, 'rst' : 0, 'psh' : 0, 'ack' : 0, 'urg' : 0 } ):
     seq = sequence
-    ack_seq = sequence
+    ack_seq = ackSeq
     doff = 5    #4 bit field, size of tcp header, 5*4 = 20 bytes
     #tcp flags
     fin = flags['fin']

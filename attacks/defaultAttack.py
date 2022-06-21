@@ -3,9 +3,9 @@ import utils.ethernetUtils as eUtils
 
 from utils.loadingAnim import showAnimation
 
-def getTcpPacket(dstHost, srcHost, tcpFlags):
+def getTcpPacket(dstHost, srcHost, tcpFlags, seqNumber=0, ackNumber=0):
     ethernetHeader = pUtils.buildEthernet(eUtils.getMacAsByteArray(dstHost.mac), eUtils.getMacAsByteArray(srcHost.mac), pUtils.IPV6_ETH_HEADER)
-    tcpHeader = pUtils.buildTcpPacket(dstHost.ipv6, srcHost.ipv6, int(dstHost.port), int(srcHost.port), flags = tcpFlags)
+    tcpHeader = pUtils.buildTcpPacket(dstHost.ipv6, srcHost.ipv6, int(dstHost.port), int(srcHost.port), sequence=seqNumber, ackSeq=ackNumber, flags=tcpFlags)
     ipHeader = pUtils.buildIPv6Packet(dstHost.ipv6, srcHost.ipv6, len(tcpHeader))
 
     return ethernetHeader + ipHeader + tcpHeader

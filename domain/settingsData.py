@@ -13,7 +13,6 @@ class HostData:
         return cls(dict['ipv6'],dict['mac'], dict['interface'], dict['port'])
 
 
-
 class PortRange:
     def __init__(self, start, end):
         self.start = start
